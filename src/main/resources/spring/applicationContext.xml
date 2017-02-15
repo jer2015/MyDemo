@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <description>公共配置</description>
+
+    <import resource="applicationContext-mvc.xml"/>
+
+    <!-- 启用注解 -->
+    <context:annotation-config />
+
+    <!-- 配置自动扫描的包 -->
+    <context:component-scan base-package="cn.tom" />
+
+    <!-- 引入配置文件 -->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <!-- 阿里 druid数据库连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <!-- 数据库基本信息配置 -->
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="filters" value="${filters}" />
+        <property name="proxyFilters">
+            <list>
+                <ref bean="slf4jLogFilter"/>
+            </list>
+        </property>
+        <!-- 最大并发连接数 -->
+        <property name="maxActive" value="${maxActive}" />
+        <!-- 初始化连接数量 -->
+        <property name="initialSize" value="${initialSize}" />
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${maxWait}" />
+        <!-- 最小空闲连接数 -->
+        <property name="minIdle" value="${minIdle}" />
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />
+        <property name="validationQuery" value="${validationQuery}" />
+        <property name="testWhileIdle" value="${testWhileIdle}" />
+        <property name="testOnBorrow" value="${testOnBorrow}" />
+        <property name="testOnReturn" value="${testOnReturn}" />
+        <property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatements}" />
+        <!-- 打开removeAbandoned功能 -->
+        <property name="removeAbandoned" value="${removeAbandoned}" />
+        <!-- 1800秒，也就是30分钟 -->
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}" />
+        <!-- 关闭abanded连接时输出错误日志 -->
+        <property name="logAbandoned" value="${logAbandoned}" />
+    </bean>
+
+    <bean id="slf4jLogFilter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter">
+         <property name="resultSetLogEnabled" value="true" />
+         <property name="statementPrepareAfterLogEnabled" value="false" />
+    </bean>
+
+    <!-- 配置mybatis -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+        <!-- mapper扫描 -->
+        <property name="mapperLocations" value="classpath:mybatis/mapper/*.xml" />
+        <property name="typeAliasesPackage" value="cn.tom.bean.BO" />
+        <!-- mybatis分页插件 -->
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <!--使用下面的方式配置参数，一行配置一个 -->
+                        <value>
+                            helperDialect=mysql
+                            reasonable=true
+                            supportMethodsArguments=true
+                            params=count=countSql
+                            autoRuntimeDialect=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+
+    <!-- mybatis的Mapper的扫描器 MapperScannerConfigure  会自动扫描
+         mapper包下的所有接口自动生成代理对象: 对象名字为Mapper接口类名(首字母小写)
+     -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.tom.dao"/>
+
+        <!-- 注意这里是SqlSessionFactoryBeanName -->
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>-->
+    </bean>
+
+    <!-- 配置事务管理器: 使用 DataSourceTransactionManager -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- enables scanning for @Transactional annotations -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+
+
+
+
+</beans>
