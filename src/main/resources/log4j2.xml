@@ -7,7 +7,7 @@
         <Console name="Console" target="SYSTEM_OUT">
             <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
             <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%line]- %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss} [%thread] %-5level %logger{36} [%line]- %msg%n"/>
         </Console>
 
         <!-- 存储到文件 -->
@@ -82,6 +82,9 @@
             <!--<appender-ref ref="Console"/>-->
         </logger>
         <logger name="org.mybatis" level="error" additivity="false">
+            <!--<appender-ref ref="Console"/>-->
+        </logger>
+        <logger name="org.apache.ibatis.io.ResolverUtil" level="error" additivity="false">
             <!--<appender-ref ref="Console"/>-->
         </logger>
         <logger name="cn.tom" level="info" additivity="false">
