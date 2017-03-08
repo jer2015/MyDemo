@@ -51,8 +51,8 @@ public class ServiceTest {
             user.setUserName("name" + i);
             user.setPassword(sb.toString());
             user.setSalt("salt");
-            Integer integer = userService.addUser(user);
-            System.out.println(integer);
+//            Integer integer = userService.addUser(user);
+//            System.out.println(integer);
         }
     }
 }
